@@ -68,7 +68,7 @@ class NolanPy:
         ax2 = fig.add_subplot(gs[0, 1])
         ax3 = fig.add_subplot(gs[1, 0])
         ax4 = fig.add_subplot(gs[1, 1])
-        ax5 = fig.add_subplot(gs[2, :])
+        ax5 = fig.add_subplot(gs[2, 0])
         unique_days = self._unique_days()
         
         ## Number of Bibes Histogram
@@ -81,7 +81,7 @@ class NolanPy:
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
         ax.set_title('Number of Bibes per day')
-        ax.set_ylabel('Time [hours]')
+        ax.set_ylabel('Number of Bibes')
 
         ## ml drank every day
         # ax = axs[0,1]
@@ -105,13 +105,15 @@ class NolanPy:
         # ax = axs[1,0]
         ax = ax3
         dates, hours, sizes, colors, patches = self._bubble_plot(shift=8)
+        #ax.axvline(x=14, ymin=0, ymax=100, color='k', linestyle='dashed', label = '6 hours')
+
         date_n = np.arange(len(dates))
         ax.scatter(hours, date_n,c=colors, s=sizes)#, s=area, c=colors, alpha=0.5)
         ax.grid(which='both', axis='both')
-        x_ticks_pos = ax.get_xticks()
+        x_ticks_pos = [0,2,4,6,8,10,12,14,16,18,20,22,24]
         ax.set_xticks(x_ticks_pos)
-        x_ticks_labels = ['','16:00', '21:00', '01:00', '06:00', '11:00', '']
-        ax.set_xticklabels(x_ticks_labels)
+        x_ticks_labels = ['16:00','18:00','20:00','22:00','24:00', '02:00','04:00', '06:00', '08:00','10:00','12:00','14:00','16:00']
+        ax.set_xticklabels(x_ticks_labels, rotation=45)
         y_ticks_pos = ax.get_yticks()
         y_ticks_pos = np.arange(y_ticks_pos[1], y_ticks_pos[-1], 7)
         ytick_labels = []
@@ -135,7 +137,9 @@ class NolanPy:
         ax = ax4
         time_between_bibes = self._time_between_bibe()
         ax.plot(time_between_bibes)
-
+        ax.axhline(y=10, xmin=0, xmax=len(time_between_bibes), color='r', linestyle='dashed', label = '10 hours')
+        ax.axhline(y=8, xmin=0, xmax=len(time_between_bibes), color='b', linestyle='dashed', label = '8 hours')
+        ax.axhline(y=6, xmin=0, xmax=len(time_between_bibes), color='orange', linestyle='dashed', label = '6 hours')
         x_ticks_pos = ax.get_xticks()
         x_ticks_pos = np.arange(x_ticks_pos[1], x_ticks_pos[-1], 100)
         xtick_labels = []
@@ -150,6 +154,7 @@ class NolanPy:
         
         ax.set_title('Time between bibes')
         ax.set_ylabel('Time [hours]')
+        ax.legend()
         
         # weight
         ax = ax5
@@ -239,7 +244,11 @@ class NolanPy:
                 # sizes
                 sizes.append((bibe_ml*40)**2)
                 # time
-                time = float(self.hour_bibe[ind].replace(':','.'))
+                # time = float(self.hour_bibe[ind].replace(':','.'))
+                hour, min = self.hour_bibe[ind].split(':')
+                hour = int(hour)
+                min = int(min)*10/60
+                time = hour+min/10
                 if shift:
                     time = self._shift_time(time, shift)
                 hours.append(time)
