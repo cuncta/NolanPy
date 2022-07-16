@@ -1,8 +1,10 @@
 import gspread
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import os
 import numpy as np
 import smtplib
+
 
 
 from email.message import EmailMessage
@@ -59,28 +61,37 @@ class NolanPy:
         self.weight = self.load_or_download('weight',11, force=force, verbose=verbose)
         
     def plot(self, show=True):
-        fig, (axs) = plt.subplots(2, 2,figsize=(10,10))
-
+        # fig, (axs) = plt.subplots(3, 2,figsize=(10,10))
+        fig = plt.figure(figsize=(10,10))
+        gs = fig.add_gridspec(3,2)
+        ax1 = fig.add_subplot(gs[0, 0])
+        ax2 = fig.add_subplot(gs[0, 1])
+        ax3 = fig.add_subplot(gs[1, 0])
+        ax4 = fig.add_subplot(gs[1, 1])
+        ax5 = fig.add_subplot(gs[2, :])
         unique_days = self._unique_days()
-        ## Number of Bibes Histogram
         
-        x_labels = unique_days[0::3]
-        ax = axs[0,0]
+        ## Number of Bibes Histogram
+        x_labels = unique_days[0::5]
+        # ax = axs[0,0]
+        ax = ax1
         ax.hist(self.dates, bins=unique_days.shape[0], rwidth=0.8)#, bins=n_bibes.shape[0], density=True)
         x_ticks_pos = ax.get_xticks()
-        x_ticks_pos = x_ticks_pos[0::3]
+        x_ticks_pos = x_ticks_pos[0::5]
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
-        ax.set_title('# of Bibes per day')
+        ax.set_title('Number of Bibes per day')
+        ax.set_ylabel('Time [hours]')
 
         ## ml drank every day
-        ax = axs[0,1]
+        # ax = axs[0,1]
+        ax = ax2
         dates_ml_bibes, ml_bibes = self.calculate_ml_per_day()
         ax.scatter(dates_ml_bibes, ml_bibes)
 
-        x_labels = dates_ml_bibes[0::3]
+        x_labels = dates_ml_bibes[0::5]
         x_ticks_pos = ax.get_xticks()
-        x_ticks_pos = x_ticks_pos[0::3]
+        x_ticks_pos = x_ticks_pos[0::5]
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
 
@@ -91,32 +102,37 @@ class NolanPy:
         ax.legend()
 
         # bubble plot
-        ax = axs[1,0]
-        dates, hours, sizes, colors = self._bubble_plot(shift=8)
+        # ax = axs[1,0]
+        ax = ax3
+        dates, hours, sizes, colors, patches = self._bubble_plot(shift=8)
         date_n = np.arange(len(dates))
         ax.scatter(hours, date_n,c=colors, s=sizes)#, s=area, c=colors, alpha=0.5)
         ax.grid(which='both', axis='both')
         x_ticks_pos = ax.get_xticks()
         ax.set_xticks(x_ticks_pos)
-        x_ticks_labels = ['',16, 21, 1, 6, 11, '']
+        x_ticks_labels = ['','16:00', '21:00', '01:00', '06:00', '11:00', '']
         ax.set_xticklabels(x_ticks_labels)
         y_ticks_pos = ax.get_yticks()
         y_ticks_pos = np.arange(y_ticks_pos[1], y_ticks_pos[-1], 7)
         ytick_labels = []
         y_ticks_pos_new = []
         for i in y_ticks_pos:
-            try:
-                ytick_labels.append(dates[int(i)])
-                y_ticks_pos_new.append(i)
-            except IndexError:
-                pass
+            if i%10==0:
+                try:
+                    ytick_labels.append(dates[int(i)])
+                    y_ticks_pos_new.append(i)
+                except IndexError:
+                    pass
         ax.set_yticks(y_ticks_pos_new)
         ax.set_yticklabels(ytick_labels)
         ax.set_title('Bibes: Hour vs Day')
         ax.set_xlabel('Hour')
+        ax.set_xlim(-1,32)
+        ax.legend(handles=patches)
 
         # time between bibes
-        ax = axs[1,1]
+        # ax = axs[1,1]
+        ax = ax4
         time_between_bibes = self._time_between_bibe()
         ax.plot(time_between_bibes)
 
@@ -133,18 +149,54 @@ class NolanPy:
         ax.set_xticklabels(xtick_labels, rotation = 90)   
         
         ax.set_title('Time between bibes')
-        ax.set_xlabel('Days')
         ax.set_ylabel('Time [hours]')
         
-        
-        
+        # weight
+        ax = ax5
+        percentil = self._get_percentil()
+        percentil_list = ['3rd', '5th', '10th', '25th','50th', '75th', '90th', '95th', '97th']
+        age_months, weight = self._get_Nolan_age_weight()
+        ax.plot(age_months, weight, 'r', marker='o', linewidth=3, label='Nolan')
+        color_list = ['navy', 'royalblue', 'cornflowerblue', 'lightskyblue', 'grey', 'lightpink', 'hotpink', 'orchid','darkviolet']
+        for ind,p in enumerate(percentil_list):
+            if p == '50th':
+                ls = 'solid'
+            else:
+                ls = 'dashed'
+            ax.plot(percentil[:,0], percentil[:,ind+1], color_list[ind], linestyle=ls, label=p+' percentil')
+        ax.legend()
+        ax.set_ylabel('Weight [kg]')
+        ax.set_xlabel('Age [months]')
+        ax.set_xlim(-0.02,age_months[-1]+2 )
+        ax.set_ylim(1.8,weight[-1]+3 )
+        ax.set_title('Weight')
+        #ax.set_yscale('log')
         plt.tight_layout()
         plt.savefig('Nolan.png')
         plt.savefig('Nolan.pdf')
 
         if show:
             plt.show()
+    def _get_Nolan_age_weight(self):
+        age = []
+        weight = []
+        for ind,a in enumerate(self.age_months):
+            w = self.weight[ind]
+            if a =='' or w=='':
+                break
+            else:
+                a = a.replace(',','.')
+                w = w.replace(',','.')
+                age.append(float(a))
+                weight.append(float(w))
+                weight
 
+        return age, weight
+    
+    def _get_percentil(self):
+        percentil = np.genfromtxt('data/weight_percentils.csv', delimiter=',')
+        return percentil
+    
     def _shift_time(self, x, shift):
         if x<(24-shift):
             x += shift
@@ -153,7 +205,7 @@ class NolanPy:
         return x
 
     def _time_between_bibe(self):
-        dates, hours, sizes, colors = self._bubble_plot(shift=0)
+        _, hours, _, _,_ = self._bubble_plot(shift=0)
         times = []
         for ind in range(1,len(hours)):
             if hours[ind]>hours[ind-1]:
@@ -203,7 +255,19 @@ class NolanPy:
                 previous_date = self.dates[ind]
             except ValueError:
                 break
-        return dates, hours, sizes, colors
+        color_palette = ['r', 'g', 'b', 'orange','violet', 'cyan', 'magenta','k', 'purple','brown']
+        patches = []
+        for ind, c in enumerate(color_palette):
+            if ind == 0:
+                label=str(ind+1)+'st'
+            elif ind == 1:
+                label=str(ind+1)+'nd'
+            elif ind ==2:
+                label=str(ind+1)+'rd'
+            else:
+                label=str(ind+1)+'th'
+            patches.append(mpatches.Patch(color=c, label=label))
+        return dates, hours, sizes, colors, patches
 
     def calculate_ml_per_day(self):
         ml_bibes = []
@@ -247,7 +311,7 @@ class NolanPy:
         newMessage['From'] = Sender_Email                   
         newMessage['To'] = Reciever_Email                   
         newMessage.set_content('Hi,\nthe new Nolan tracking plots are here!') 
-        files = ['Nolan.png']
+        files = ['Nolan.pdf']
         for file in files:
             with open(file, 'rb') as f:
                 file_data = f.read()
