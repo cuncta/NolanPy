@@ -1,13 +1,9 @@
 import gspread
-import string
 import matplotlib.pyplot as plt
 import os
 import numpy as np
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.mime.base import MIMEBase
-from email import encoders
+
 
 from email.message import EmailMessage
 from email_credentials import Password
@@ -101,16 +97,20 @@ class NolanPy:
         ax.scatter(hours, date_n,c=colors, s=sizes)#, s=area, c=colors, alpha=0.5)
         ax.grid(which='both', axis='both')
         x_ticks_pos = ax.get_xticks()
+        ax.set_xticks(x_ticks_pos)
         x_ticks_labels = ['',16, 21, 1, 6, 11, '']
         ax.set_xticklabels(x_ticks_labels)
         y_ticks_pos = ax.get_yticks()
         y_ticks_pos = np.arange(y_ticks_pos[1], y_ticks_pos[-1], 7)
         ytick_labels = []
+        y_ticks_pos_new = []
         for i in y_ticks_pos:
             try:
                 ytick_labels.append(dates[int(i)])
+                y_ticks_pos_new.append(i)
             except IndexError:
                 pass
+        ax.set_yticks(y_ticks_pos_new)
         ax.set_yticklabels(ytick_labels)
         ax.set_title('Bibes: Hour vs Day')
         ax.set_xlabel('Hour')
@@ -140,6 +140,8 @@ class NolanPy:
         
         plt.tight_layout()
         plt.savefig('Nolan.png')
+        plt.savefig('Nolan.pdf')
+
         if show:
             plt.show()
 
@@ -237,41 +239,7 @@ class NolanPy:
                 unique_days.append(d)            
         return np.array(unique_days)
 
-    def send_email(self, receiver_address='simnur.shared@gmail.com'):
-        
-        mail_content = '''Hi,
-
-        The new Nolan tracking plots are here!
-        '''
-        #The mail addresses and password
-        sender_address = 'simone.vadilonga@gmail.com'
-        sender_pass = 'vqgqdvwpcilkccja'
-        #Setup the MIME
-        message = MIMEMultipart()
-        message['From'] = sender_address
-        message['To'] = receiver_address
-        message['Subject'] = 'Nolan Tracking'
-        #The subject line
-        #The body and the attachments for the mail
-        message.attach(MIMEText(mail_content, 'plain'))
-        attach_file_name = 'Nolan.png'
-        attach_file = open(attach_file_name, 'rb') # Open the file as binary mode
-        payload = MIMEBase('application', 'octate-stream')
-        payload.set_payload((attach_file).read())
-        encoders.encode_base64(payload) #encode the attachment
-        #add payload header with filename
-        payload.add_header('Content-Decomposition', 'attachment', filename=attach_file_name)
-        message.attach(payload)
-        #Create SMTP session for sending the mail
-        session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
-        session.starttls() #enable security
-        session.login(sender_address, sender_pass) #login with mail_id and password
-        text = message.as_string()
-        session.sendmail(sender_address, receiver_address, text)
-        session.quit()
-        print('Mail Sent')
-
-    def send_email2(self, receiver_address='simnur.shared@gmail.com'):
+    def send_email(self, receiver_address='simnur.shared@gmail.com', send =True):
         Sender_Email = "simone.vadilonga@gmail.com"
         Reciever_Email = receiver_address
         newMessage = EmailMessage()                         
@@ -285,9 +253,10 @@ class NolanPy:
                 file_data = f.read()
                 file_name = f.name
             newMessage.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-            
-            smtp.login(Sender_Email, Password)              
-            smtp.send_message(newMessage)
+        if send:
+            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                smtp.login(Sender_Email, Password)              
+                smtp.send_message(newMessage)
+            print('Email sent to', receiver_address)
 
                 
