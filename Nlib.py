@@ -3,10 +3,17 @@ import string
 import matplotlib.pyplot as plt
 import os
 import numpy as np
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+from email import encoders
 
+from email.message import EmailMessage
+from email_credentials import Password
 
 class NolanPy:
-    """RayUIRunner class implements all logic to start a RayUI process
+    """Let Us track Nolan
     """
     def __init__(self, url) -> None:
         self.url = url
@@ -55,8 +62,8 @@ class NolanPy:
         
         self.weight = self.load_or_download('weight',11, force=force, verbose=verbose)
         
-    def plot(self):
-        fig, (axs) = plt.subplots(4, 2,figsize=(10,10))
+    def plot(self, show=True):
+        fig, (axs) = plt.subplots(2, 2,figsize=(10,10))
 
         unique_days = self._unique_days()
         ## Number of Bibes Histogram
@@ -68,6 +75,7 @@ class NolanPy:
         x_ticks_pos = x_ticks_pos[0::3]
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
+        ax.set_title('# of Bibes per day')
 
         ## ml drank every day
         ax = axs[0,1]
@@ -82,6 +90,9 @@ class NolanPy:
 
         ml_bibes_ma       = self._moving_average(ml_bibes,4)
         ax.plot(ml_bibes_ma, 'r', label='moving average')
+        ax.set_title('Milk intake per day')
+        ax.set_ylabel('Milk [litre]')
+        ax.legend()
 
         # bubble plot
         ax = axs[1,0]
@@ -93,7 +104,6 @@ class NolanPy:
         x_ticks_labels = ['',16, 21, 1, 6, 11, '']
         ax.set_xticklabels(x_ticks_labels)
         y_ticks_pos = ax.get_yticks()
-        print(y_ticks_pos)
         y_ticks_pos = np.arange(y_ticks_pos[1], y_ticks_pos[-1], 7)
         ytick_labels = []
         for i in y_ticks_pos:
@@ -102,10 +112,37 @@ class NolanPy:
             except IndexError:
                 pass
         ax.set_yticklabels(ytick_labels)
+        ax.set_title('Bibes: Hour vs Day')
         ax.set_xlabel('Hour')
-        plt.tight_layout()
-        plt.show()
+
+        # time between bibes
+        ax = axs[1,1]
+        time_between_bibes = self._time_between_bibe()
+        ax.plot(time_between_bibes)
+
+        x_ticks_pos = ax.get_xticks()
+        x_ticks_pos = np.arange(x_ticks_pos[1], x_ticks_pos[-1], 100)
+        xtick_labels = []
+        for i in x_ticks_pos:
+            try:
+                #print (i)
+                xtick_labels.append(dates[int(i+1)])
+            except IndexError:
+                break
+        ax.set_xticks(x_ticks_pos)
+        ax.set_xticklabels(xtick_labels, rotation = 90)   
         
+        ax.set_title('Time between bibes')
+        ax.set_xlabel('Days')
+        ax.set_ylabel('Time [hours]')
+        
+        
+        
+        plt.tight_layout()
+        plt.savefig('Nolan.png')
+        if show:
+            plt.show()
+
     def _shift_time(self, x, shift):
         if x<(24-shift):
             x += shift
@@ -113,9 +150,18 @@ class NolanPy:
             x = shift - (24-x)
         return x
 
-
-
-
+    def _time_between_bibe(self):
+        dates, hours, sizes, colors = self._bubble_plot(shift=0)
+        times = []
+        for ind in range(1,len(hours)):
+            if hours[ind]>hours[ind-1]:
+                times.append(hours[ind]-hours[ind-1])
+            else:
+                b = 24-hours[ind-1]
+                times .append(b+hours[ind])
+        return times
+                
+        return
     def _bubble_plot(self, shift = 0):
         dates  = []
         sizes  = []
@@ -184,14 +230,64 @@ class NolanPy:
             return x
         return np.convolve(x, np.ones(w), 'valid') / w
 
-
     def _unique_days(self):
         unique_days = []
         for d in self.dates:
             if d not in unique_days:
-                unique_days.append(d)
-        
-            
+                unique_days.append(d)            
         return np.array(unique_days)
 
+    def send_email(self, receiver_address='simnur.shared@gmail.com'):
         
+        mail_content = '''Hi,
+
+        The new Nolan tracking plots are here!
+        '''
+        #The mail addresses and password
+        sender_address = 'simone.vadilonga@gmail.com'
+        sender_pass = 'vqgqdvwpcilkccja'
+        #Setup the MIME
+        message = MIMEMultipart()
+        message['From'] = sender_address
+        message['To'] = receiver_address
+        message['Subject'] = 'Nolan Tracking'
+        #The subject line
+        #The body and the attachments for the mail
+        message.attach(MIMEText(mail_content, 'plain'))
+        attach_file_name = 'Nolan.png'
+        attach_file = open(attach_file_name, 'rb') # Open the file as binary mode
+        payload = MIMEBase('application', 'octate-stream')
+        payload.set_payload((attach_file).read())
+        encoders.encode_base64(payload) #encode the attachment
+        #add payload header with filename
+        payload.add_header('Content-Decomposition', 'attachment', filename=attach_file_name)
+        message.attach(payload)
+        #Create SMTP session for sending the mail
+        session = smtplib.SMTP('smtp.gmail.com', 587) #use gmail with port
+        session.starttls() #enable security
+        session.login(sender_address, sender_pass) #login with mail_id and password
+        text = message.as_string()
+        session.sendmail(sender_address, receiver_address, text)
+        session.quit()
+        print('Mail Sent')
+
+    def send_email2(self, receiver_address='simnur.shared@gmail.com'):
+        Sender_Email = "simone.vadilonga@gmail.com"
+        Reciever_Email = receiver_address
+        newMessage = EmailMessage()                         
+        newMessage['Subject'] = "Nolan Tracking" 
+        newMessage['From'] = Sender_Email                   
+        newMessage['To'] = Reciever_Email                   
+        newMessage.set_content('Hi,\nthe new Nolan tracking plots are here!') 
+        files = ['Nolan.png']
+        for file in files:
+            with open(file, 'rb') as f:
+                file_data = f.read()
+                file_name = f.name
+            newMessage.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+            
+            smtp.login(Sender_Email, Password)              
+            smtp.send_message(newMessage)
+
+                

@@ -18,6 +18,7 @@ N = NolanPy("https://docs.google.com/spreadsheets/d/11T2xbPFjlk1UI3NbdFFFGPQioUY
 
 N.load_data(force=False, verbose=True)
 
-N.plot()
+N.plot(show=False)
+N.send_email2()
    
 
