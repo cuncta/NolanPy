@@ -140,17 +140,19 @@ class NolanPy:
         ax.axhline(y=10, xmin=0, xmax=len(time_between_bibes), color='r', linestyle='dashed', label = '10 hours')
         ax.axhline(y=8, xmin=0, xmax=len(time_between_bibes), color='b', linestyle='dashed', label = '8 hours')
         ax.axhline(y=6, xmin=0, xmax=len(time_between_bibes), color='orange', linestyle='dashed', label = '6 hours')
-        x_ticks_pos = ax.get_xticks()
-        x_ticks_pos = np.arange(x_ticks_pos[1], x_ticks_pos[-1], 100)
-        xtick_labels = []
-        for i in x_ticks_pos:
+        xticks_pos = ax.get_xticks()
+        xticks_pos_new = np.arange(xticks_pos[1], xticks_pos[-1], 100)
+        xticks_labels = []
+        for ind,i in enumerate(xticks_pos_new):
             try:
                 #print (i)
-                xtick_labels.append(dates[int(i+1)])
+                xticks_labels.append(dates[int(i+1)])
             except IndexError:
+                print('except')
+                xticks_pos_new = xticks_pos_new[0:ind]
                 break
-        ax.set_xticks(x_ticks_pos)
-        ax.set_xticklabels(xtick_labels, rotation = 90)   
+        ax.set_xticks(xticks_pos_new)
+        ax.set_xticklabels(xticks_labels, rotation = 90)   
         
         ax.set_title('Time between bibes')
         ax.set_ylabel('Time [hours]')
