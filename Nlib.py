@@ -82,8 +82,8 @@ class NolanPy:
         x_ticks_pos = x_ticks_pos[0::5]
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
-        ax.set_title('Number of Bibes per day')
-        ax.set_ylabel('Number of Bibes')
+        ax.set_title('Number of drinks per day')
+        ax.set_ylabel('Number of drinks')
 
         ## ml drank every day
         # ax = axs[0,1]
