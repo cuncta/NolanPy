@@ -4,6 +4,7 @@ import matplotlib.patches as mpatches
 import os
 import numpy as np
 import smtplib
+from datetime import datetime
 
 
 
@@ -69,6 +70,7 @@ class NolanPy:
         ax3 = fig.add_subplot(gs[1, 0])
         ax4 = fig.add_subplot(gs[1, 1])
         ax5 = fig.add_subplot(gs[2, 0])
+        ax6 = fig.add_subplot(gs[2, 1])
         unique_days = self._unique_days()
         
         ## Number of Bibes Histogram
@@ -87,7 +89,7 @@ class NolanPy:
         # ax = axs[0,1]
         ax = ax2
         dates_ml_bibes, ml_bibes = self.calculate_ml_per_day()
-        ax.scatter(dates_ml_bibes, ml_bibes)
+        ax.plot(dates_ml_bibes, ml_bibes, marker='o')
 
         x_labels = dates_ml_bibes[0::5]
         x_ticks_pos = ax.get_xticks()
@@ -178,6 +180,17 @@ class NolanPy:
         ax.set_ylim(1.8,weight[-1]+3 )
         ax.set_title('Weight')
         #ax.set_yscale('log')
+
+        # nuria plot
+        ax=ax6
+        ax.hist(hours, bins=24, rwidth=0.8)#, bins=n_bibes.shape[0], density=True)
+        xticks_pos= ax.get_xticks()
+        xticks_labels=np.arange(0,24)
+        ax.set_xticks(xticks_labels+0.5)
+        ax.set_xticklabels(xticks_labels,rotation = 90)   
+        ax.set_title('Number of bottles vs feeding time')
+        ax.set_xlabel('Feeding time [h]')
+        ax.set_ylabel('Number of bottles')
         plt.tight_layout()
         plt.savefig('Nolan.png')
         plt.savefig('Nolan.pdf')
@@ -201,7 +214,7 @@ class NolanPy:
         return age, weight
     
     def _get_percentil(self):
-        percentil = np.genfromtxt('data/weight_percentils.csv', delimiter=',')
+        percentil = np.genfromtxt('/home/simone/Desktop/Private/NolanPy/data/weight_percentils.csv', delimiter=',')
         return percentil
     
     def _shift_time(self, x, shift):
@@ -315,6 +328,7 @@ class NolanPy:
         return np.array(unique_days)
 
     def send_email(self, receiver_address='simnur.shared@gmail.com', send =True):
+        
         Sender_Email = "simone.vadilonga@gmail.com"
         Reciever_Email = receiver_address
         newMessage = EmailMessage()                         
@@ -329,9 +343,17 @@ class NolanPy:
                 file_name = f.name
             newMessage.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
         if send:
-            with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
-                smtp.login(Sender_Email, Password)              
-                smtp.send_message(newMessage)
-            print('Email sent to', receiver_address)
+            self.log('Sending results to '+receiver_address)
+            try:
+                with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
+                    smtp.login(Sender_Email, Password)              
+                    smtp.send_message(newMessage)
+                print('Email sent to', receiver_address)
+                print('Results sent to '+receiver_address)
+            except:
+                print('Failed sending results to '+receiver_address)
+    
+
+
 
                 
