@@ -27,7 +27,7 @@ class NolanPy:
         
     
     def load_or_download(self, filename, column, force=False,verbose=False):
-        path = os.path.join('data', filename+'.npy')
+        path = os.path.join('/home/simone/Desktop/Private/NolanPy/data', filename+'.npy')
         if os.path.exists(path) and force==False:
             self.data = np.load(path)
             if verbose:
@@ -89,16 +89,39 @@ class NolanPy:
         # ax = axs[0,1]
         ax = ax2
         dates_ml_bibes, ml_bibes = self.calculate_ml_per_day()
-        ax.plot(dates_ml_bibes, ml_bibes, marker='o')
-
-        x_labels = dates_ml_bibes[0::5]
-        x_ticks_pos = ax.get_xticks()
-        x_ticks_pos = x_ticks_pos[0::5]
-        ax.set_xticks(x_ticks_pos)
-        ax.set_xticklabels(x_labels, rotation=90)
+        dates_ml_bibes_plot = np.arange(0,len(dates_ml_bibes))
+        ax.plot(dates_ml_bibes_plot,ml_bibes, marker='o')
+        
+        start_2m = dates_ml_bibes.index("04.05.2022") 
+        end_2m   = dates_ml_bibes.index("20.05.2022") 
+        start_3m = dates_ml_bibes.index("21.05.2022") 
+        end_3m   = dates_ml_bibes.index("20.06.2022") 
+        start_4m = dates_ml_bibes.index("21.06.2022") 
+        #end_4m   = dates_ml_bibes.index("20.07.2022") 
+        end_4m   = len(dates_ml_bibes)
+        # start_5m = dates_ml_bibes.index("21.07.2022") 
+        # end_5m   = dates_ml_bibes.index("20.08.2022") 
+        ax.plot((start_2m,end_2m),(0.7,0.7),color='orange', linestyle='dashed')
+        ax.plot((start_2m,end_2m),(0.8,0.8),color='orange', linestyle='dashed')
+        ax.plot((start_3m,end_3m),(0.13*6,0.13*6),color='red', linestyle='dashed')
+        ax.plot((start_3m,end_3m),(0.13*7,0.13*7),color='red', linestyle='dashed')
+        ax.plot((start_4m,end_4m),(0.17*5,0.17*5),color='g', linestyle='dashed')
+        ax.plot((start_4m,end_4m),(0.17*6,0.17*6),color='g', linestyle='dashed')
+        # ax.plot((start_5m,end_5m),(0.7,0.7),color='orange', linestyle='dashed', label = 'until 2 months')
+        # ax.plot((start_5m,end_5m),(0.8,0.8),color='orange', linestyle='dashed')
+        xticks_pos = []
+        xticks_label = []
+        for v,d in enumerate(dates_ml_bibes):
+            if v%5==0:
+                xticks_pos.append(v)
+                xticks_label.append(d)
+        ax.set_xticks(xticks_pos)
+        ax.set_xticklabels(xticks_label, rotation=90)
+        
 
         ml_bibes_ma       = self._moving_average(ml_bibes,4)
-        ax.plot(ml_bibes_ma, 'r', label='moving average')
+        dates_ml_bibes_plot       = self._moving_average(dates_ml_bibes_plot,4)
+        ax.plot(dates_ml_bibes_plot,ml_bibes_ma, 'r', label='moving average')
         ax.set_title('Milk intake per day')
         ax.set_ylabel('Milk [litre]')
         ax.legend()
@@ -150,7 +173,6 @@ class NolanPy:
                 #print (i)
                 xticks_labels.append(dates[int(i+1)])
             except IndexError:
-                print('except')
                 xticks_pos_new = xticks_pos_new[0:ind]
                 break
         ax.set_xticks(xticks_pos_new)
@@ -343,7 +365,7 @@ class NolanPy:
                 file_name = f.name
             newMessage.add_attachment(file_data, maintype='application', subtype='octet-stream', filename=file_name)
         if send:
-            self.log('Sending results to '+receiver_address)
+            print('Sending results to '+receiver_address)
             try:
                 with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
                     smtp.login(Sender_Email, Password)              
