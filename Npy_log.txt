@@ -1,0 +1,50 @@
+Executing Npy.py: Tue 19 Jul 10:15:01 CEST 2022
+downloading dates
+downloading bibe_color
+downloading hour_bibe
+downloading day_for_plot
+downloading size
+downloading time_between_bibes
+downloading bibes_ml
+downloading age_months
+downloading weight
+Sending results to simnur.shared@gmail.com
+Email sent to simnur.shared@gmail.com
+Results sent to simnur.shared@gmail.com
+Sending results to gloriana.rangone@gmail.com
+Email sent to gloriana.rangone@gmail.com
+Results sent to gloriana.rangone@gmail.com
+Executing Npy.py: Wed 20 Jul 10:15:01 CEST 2022
+downloading dates
+Executing Npy.py: Mi 20. Jul 19:48:01 CEST 2022
+downloading dates
+downloading bibe_color
+downloading hour_bibe
+downloading day_for_plot
+downloading size
+downloading time_between_bibes
+downloading bibes_ml
+downloading age_months
+downloading weight
+Sending results to simnur.shared@gmail.com
+Email sent to simnur.shared@gmail.com
+Results sent to simnur.shared@gmail.com
+Sending results to gloriana.rangone@gmail.com
+Email sent to gloriana.rangone@gmail.com
+Results sent to gloriana.rangone@gmail.com
+Executing Npy.py: Fr 22. Jul 10:15:01 CEST 2022
+downloading dates
+downloading bibe_color
+downloading hour_bibe
+downloading day_for_plot
+downloading size
+downloading time_between_bibes
+downloading bibes_ml
+downloading age_months
+downloading weight
+Sending results to simnur.shared@gmail.com
+Email sent to simnur.shared@gmail.com
+Results sent to simnur.shared@gmail.com
+Sending results to gloriana.rangone@gmail.com
+Email sent to gloriana.rangone@gmail.com
+Results sent to gloriana.rangone@gmail.com

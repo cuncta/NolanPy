@@ -82,7 +82,7 @@ class NolanPy:
         x_ticks_pos = x_ticks_pos[0::5]
         ax.set_xticks(x_ticks_pos)
         ax.set_xticklabels(x_labels, rotation=90)
-        ax.set_title('Number of drinks per day')
+        ax.set_title('Drinks vs Day')
         ax.set_ylabel('Number of drinks')
 
         ## ml drank every day
@@ -97,18 +97,17 @@ class NolanPy:
         start_3m = dates_ml_bibes.index("21.05.2022") 
         end_3m   = dates_ml_bibes.index("20.06.2022") 
         start_4m = dates_ml_bibes.index("21.06.2022") 
-        #end_4m   = dates_ml_bibes.index("20.07.2022") 
-        end_4m   = len(dates_ml_bibes)
-        # start_5m = dates_ml_bibes.index("21.07.2022") 
-        # end_5m   = dates_ml_bibes.index("20.08.2022") 
+        end_4m   = dates_ml_bibes.index("20.07.2022") 
+        start_5m = dates_ml_bibes.index("21.07.2022")
+        end_5m   = len(dates_ml_bibes) 
         ax.plot((start_2m,end_2m),(0.7,0.7),color='orange', linestyle='dashed')
         ax.plot((start_2m,end_2m),(0.8,0.8),color='orange', linestyle='dashed')
-        ax.plot((start_3m,end_3m),(0.13*6,0.13*6),color='red', linestyle='dashed')
-        ax.plot((start_3m,end_3m),(0.13*7,0.13*7),color='red', linestyle='dashed')
+        ax.plot((start_3m,end_3m),(0.13*6,0.13*6),color='pink', linestyle='dashed')
+        ax.plot((start_3m,end_3m),(0.13*7,0.13*7),color='pink', linestyle='dashed')
         ax.plot((start_4m,end_4m),(0.17*5,0.17*5),color='g', linestyle='dashed')
         ax.plot((start_4m,end_4m),(0.17*6,0.17*6),color='g', linestyle='dashed')
-        # ax.plot((start_5m,end_5m),(0.7,0.7),color='orange', linestyle='dashed', label = 'until 2 months')
-        # ax.plot((start_5m,end_5m),(0.8,0.8),color='orange', linestyle='dashed')
+        ax.plot((start_5m,end_5m),(0.2*4,0.2*4),color='purple', linestyle='dashed')
+        ax.plot((start_5m,end_5m),(0.2*5,0.2*5),color='purple', linestyle='dashed')
         xticks_pos = []
         xticks_label = []
         for v,d in enumerate(dates_ml_bibes):
@@ -122,7 +121,7 @@ class NolanPy:
         ml_bibes_ma       = self._moving_average(ml_bibes,4)
         dates_ml_bibes_plot       = self._moving_average(dates_ml_bibes_plot,4)
         ax.plot(dates_ml_bibes_plot,ml_bibes_ma, 'r', label='moving average')
-        ax.set_title('Milk intake per day')
+        ax.set_title('Daily Milk Intake')
         ax.set_ylabel('Milk [litre]')
         ax.legend()
 
@@ -153,9 +152,9 @@ class NolanPy:
         ax.set_yticks(y_ticks_pos_new)
         ax.set_yticklabels(ytick_labels)
         ax.set_title('Bibes: Hour vs Day')
-        ax.set_xlabel('Hour')
-        ax.set_xlim(-1,32)
-        ax.legend(handles=patches)
+        ax.set_xlabel('Time of the Day [h]')
+        ax.set_xlim(-1,28)
+        ax.legend(handles=patches,fontsize=6)
 
         # time between bibes
         # ax = axs[1,1]
@@ -179,7 +178,7 @@ class NolanPy:
         ax.set_xticklabels(xticks_labels, rotation = 90)   
         
         ax.set_title('Time between bibes')
-        ax.set_ylabel('Time [hours]')
+        ax.set_ylabel('Time [h]')
         ax.legend()
         
         # weight
@@ -195,24 +194,24 @@ class NolanPy:
             else:
                 ls = 'dashed'
             ax.plot(percentil[:,0], percentil[:,ind+1], color_list[ind], linestyle=ls, label=p+' percentil')
-        ax.legend()
+        ax.legend(loc=4,fontsize=6)
         ax.set_ylabel('Weight [kg]')
         ax.set_xlabel('Age [months]')
-        ax.set_xlim(-0.02,age_months[-1]+2 )
-        ax.set_ylim(1.8,weight[-1]+3 )
-        ax.set_title('Weight')
+        ax.set_xlim(-0.02,age_months[-1]+5 )
+        ax.set_ylim(1.8,weight[-1]+4 )
+        ax.set_title('Weight Development')
         #ax.set_yscale('log')
 
-        # nuria plot
+        # bottles vs feeding time
         ax=ax6
-        ax.hist(hours, bins=24, rwidth=0.8)#, bins=n_bibes.shape[0], density=True)
+        ax.hist(hours[-100:], bins=24, rwidth=0.8)#, bins=n_bibes.shape[0], density=True)
         xticks_pos= ax.get_xticks()
         xticks_labels=np.arange(0,24)
         ax.set_xticks(xticks_labels+0.5)
         ax.set_xticklabels(xticks_labels,rotation = 90)   
-        ax.set_title('Number of bottles vs feeding time')
-        ax.set_xlabel('Feeding time [h]')
-        ax.set_ylabel('Number of bottles')
+        ax.set_title('Drinks vs Hour, since:'+str(dates[-100]))
+        ax.set_xlabel('Time of the day [h]')
+        ax.set_ylabel('Number of Drinks')
         plt.tight_layout()
         plt.savefig('Nolan.png')
         plt.savefig('Nolan.pdf')
