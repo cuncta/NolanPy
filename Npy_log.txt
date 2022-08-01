@@ -136,3 +136,19 @@ Executing Npy.py: Sa 30. Jul 10:15:01 CEST 2022
 downloading dates
 Executing Npy.py: So 31. Jul 10:15:01 CEST 2022
 downloading dates
+Executing Npy.py: Mo 1. Aug 10:15:01 CEST 2022
+downloading dates
+downloading bibe_color
+downloading hour_bibe
+downloading day_for_plot
+downloading size
+downloading time_between_bibes
+downloading bibes_ml
+downloading age_months
+downloading weight
+Sending results to simnur.shared@gmail.com
+Email sent to simnur.shared@gmail.com
+Results sent to simnur.shared@gmail.com
+Sending results to gloriana.rangone@gmail.com
+Email sent to gloriana.rangone@gmail.com
+Results sent to gloriana.rangone@gmail.com
