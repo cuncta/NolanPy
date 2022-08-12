@@ -1,4 +1,0 @@
-/bin/sh: 1: simone: not found
-Executed: Tue 19 Jul 11:38:01 CEST 2022
-/bin/sh: 1: simone: not found
-Executed: Wed 20 Jul 11:38:01 CEST 2022
