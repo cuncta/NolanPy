@@ -27,7 +27,7 @@ class NolanPy:
         
     
     def load_or_download(self, filename, column, force=False,verbose=False):
-        path = os.path.join('/home/simone/Desktop/Private/NolanPy/data', filename+'.npy')
+        path = os.path.join('/home/simone/Private/NolanPy/data', filename+'.npy')
         if os.path.exists(path) and force==False:
             self.data = np.load(path)
             if verbose:
@@ -235,7 +235,7 @@ class NolanPy:
         return age, weight
     
     def _get_percentil(self):
-        percentil = np.genfromtxt('/home/simone/Desktop/Private/NolanPy/data/weight_percentils.csv', delimiter=',')
+        percentil = np.genfromtxt('/home/simone/Private/NolanPy/data/weight_percentils.csv', delimiter=',')
         return percentil
     
     def _shift_time(self, x, shift):
