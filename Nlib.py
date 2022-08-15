@@ -6,7 +6,7 @@ import numpy as np
 import smtplib
 from datetime import datetime
 
-
+from tqdm import tqdm
 
 from email.message import EmailMessage
 from email_credentials import Password
@@ -43,23 +43,33 @@ class NolanPy:
         
     
     def load_data(self, force=False,verbose=False):
+        print('Downloading Data')
+        pbar = tqdm(total=9)
         self.dates = self.load_or_download('dates',1, force=force, verbose=verbose)
-        
+        pbar.update(1)
         self.bibe_color = self.load_or_download('bibe_color',2, force=force, verbose=verbose)
-        
+
+        pbar.update(1)
         self.hour_bibe = self.load_or_download('hour_bibe',3, force=force, verbose=verbose)
+        pbar.update(1)
         
         self.day_for_plot = self.load_or_download('day_for_plot',4, force=force, verbose=verbose)
+        pbar.update(1)
         
         self.size = self.load_or_download('size',5, force=force, verbose=verbose)
+        pbar.update(1)
         
         self.time_between_bibes = self.load_or_download('time_between_bibes',6, force=force, verbose=verbose)
+        pbar.update(1)
         
         self.bibes_ml = self.load_or_download('bibes_ml',7, force=force, verbose=verbose)
+        pbar.update(1)
 
         self.age_months = self.load_or_download('age_months',10, force=force, verbose=verbose)
+        pbar.update(1)
         
         self.weight = self.load_or_download('weight',11, force=force, verbose=verbose)
+        pbar.update(1)
         
     def plot(self, show=True):
         # fig, (axs) = plt.subplots(3, 2,figsize=(10,10))
@@ -205,9 +215,9 @@ class NolanPy:
         # bottles vs feeding time
         ax=ax6
         ax.hist(hours[-100:], bins=24, rwidth=0.8)#, bins=n_bibes.shape[0], density=True)
-        xticks_pos= ax.get_xticks()
-        xticks_labels=np.arange(0,24)
-        ax.set_xticks(xticks_labels+0.5)
+        xticks_pos=np.arange(0,24)
+        xticks_labels=np.roll(np.arange(0,24),8)
+        ax.set_xticks(xticks_pos+0.5)
         ax.set_xticklabels(xticks_labels,rotation = 90)   
         ax.set_title('Drinks vs Hour, since:'+str(dates[-100]))
         ax.set_xlabel('Time of the day [h]')
@@ -218,6 +228,7 @@ class NolanPy:
 
         if show:
             plt.show()
+    
     def _get_Nolan_age_weight(self):
         age = []
         weight = []
@@ -288,6 +299,7 @@ class NolanPy:
                 if shift:
                     time = self._shift_time(time, shift)
                 hours.append(time)
+                #print("DEBUG:: time", self.hour_bibe[ind],time)
                 # colors
                 #print('date',self.dates[ind],'previous',previous_date)
                 if self.dates[ind]==previous_date:
